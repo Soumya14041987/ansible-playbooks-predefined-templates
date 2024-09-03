@@ -1,0 +1,36 @@
+---
+- name: Install Terraform on Ubuntu Instances
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Update the apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install dependencies (unzip, curl)
+      apt:
+        name: 
+          - unzip
+          - curl
+        state: present
+
+    - name: Download Terraform binary
+      ansible.builtin.command:
+        cmd: curl -fsSL -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
+
+    - name: Unzip Terraform binary
+      ansible.builtin.unarchive:
+        src: /tmp/terraform.zip
+        dest: /usr/local/bin/
+        remote_src: yes
+
+    - name: Verify Terraform installation
+      ansible.builtin.command:
+        cmd: terraform --version
+      register: terraform_version
+
+    - name: Display Terraform version
+      debug:
+        msg: "Terraform version installed: {{ terraform_version.stdout }}"
+
